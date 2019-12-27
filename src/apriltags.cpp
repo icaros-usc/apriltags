@@ -33,8 +33,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sensor_msgs/Image.h>
 #include <image_transport/image_transport.h>
 #include <visualization_msgs/Marker.h>
-#include <opencv/cv.h>
-#include <opencv/highgui.h>
+#include <opencv2/opencv.hpp>
 #include <cv_bridge/cv_bridge.h>
 
 // #include <src/TagDetector.h>
@@ -109,7 +108,7 @@ void GetMarkerTransformUsingOpenCV(const TagDetection& detection, Eigen::Matrix4
     image_pts.push_back(detection.p[2]);
     image_pts.push_back(detection.p[3]);
 
-    cv::Matx33f intrinsics(camera_info_.K[0], 0, camera_info_.K[2],
+    cv::Matx33d intrinsics(camera_info_.K[0], 0, camera_info_.K[2],
                            0, camera_info_.K[4], camera_info_.K[5],
                            0, 0, 1);
     
@@ -279,16 +278,16 @@ void ImageCallback(const sensor_msgs::ImageConstPtr& msg)
     }
     
     cv::Mat subscribed_gray = subscribed_ptr->image;
-    cv::Point2d opticalCenter;
+    cv::Point2f opticalCenter;
 
     if ((camera_info_.K[2] > 1.0) && (camera_info_.K[5] > 1.0))
     {
         // cx,cy from intrinsic matric look reasonable, so we'll use that
-        opticalCenter = cv::Point2d(camera_info_.K[5], camera_info_.K[2]);
+        opticalCenter = cv::Point2f(camera_info_.K[5], camera_info_.K[2]);
     }
     else
     {
-        opticalCenter = cv::Point2d(0.5*subscribed_gray.rows, 0.5*subscribed_gray.cols);
+        opticalCenter = cv::Point2f(0.5*subscribed_gray.rows, 0.5*subscribed_gray.cols);
     }
 
     // Detect AprilTag markers in the image
@@ -417,7 +416,7 @@ void ImageCallback(const sensor_msgs::ImageConstPtr& msg)
 
             if (display_marker_axes_)
             {
-                cv::Matx33f intrinsics(camera_info_.K[0], 0, camera_info_.K[2],
+                cv::Matx33d intrinsics(camera_info_.K[0], 0, camera_info_.K[2],
                                        0, camera_info_.K[4], camera_info_.K[5],
                                        0, 0, 1);
                 cv::Vec4f distortion_coeff(camera_info_.D[0], camera_info_.D[1],
